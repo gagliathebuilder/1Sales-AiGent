@@ -7,6 +7,9 @@
 
 import SwiftUI
 import Speech
+#if canImport(UIKit)
+import UIKit
+#endif
 
 struct ContentView: View {
     @StateObject private var speechRecognizer = SpeechRecognizer()
@@ -24,7 +27,7 @@ struct ContentView: View {
                             .font(.headline)
                         Text(transcribedText)
                             .padding()
-                            .background(Color(.systemGray6))
+                            .background(Color(uiColor: .systemGray6))
                             .cornerRadius(10)
                     }
                     
@@ -33,7 +36,7 @@ struct ContentView: View {
                             .font(.headline)
                         Text(aiResponse)
                             .padding()
-                            .background(Color(.systemGray6))
+                            .background(Color(uiColor: .systemGray6))
                             .cornerRadius(10)
                     }
                 }
@@ -57,7 +60,7 @@ struct ContentView: View {
                 }
                 .foregroundColor(isRecording ? .red : .blue)
                 .padding()
-                .background(Color(.systemGray6))
+                .background(Color(uiColor: .systemGray6))
                 .cornerRadius(15)
             }
         }

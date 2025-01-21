@@ -2,6 +2,7 @@ import Foundation
 import Speech
 import AVFoundation
 
+#if os(iOS)
 class SpeechRecognizer: ObservableObject {
     private var audioEngine: AVAudioEngine?
     private var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
@@ -85,4 +86,16 @@ class SpeechRecognizer: ObservableObject {
         recognitionRequest = nil
         recognitionTask = nil
     }
-} 
+}
+#else
+// Stub implementation for non-iOS platforms
+class SpeechRecognizer: ObservableObject {
+    @Published var isRecording = false
+    
+    func startRecording(completion: @escaping (Result<String, Error>) -> Void) {
+        completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Speech recognition is only available on iOS"])))
+    }
+    
+    func stopRecording() {}
+}
+#endif 
