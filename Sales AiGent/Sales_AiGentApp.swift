@@ -8,7 +8,7 @@
 import SwiftUI
 
 @main
-struct Sales_AiGentApp: App {
+struct SpeechAIApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
