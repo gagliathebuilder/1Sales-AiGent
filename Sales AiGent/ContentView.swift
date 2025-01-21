@@ -16,55 +16,87 @@ struct ContentView: View {
     @State private var transcribedText = ""
     @State private var isRecording = false
     @State private var aiResponse = ""
+    @StateObject private var openAIService = OpenAIService()
+    @State private var isProcessing = false
+    @State private var errorMessage: String?
     
     var body: some View {
-        VStack(spacing: 20) {
-            // Transcription Display
-            ScrollView {
-                VStack(alignment: .leading, spacing: 10) {
-                    if !transcribedText.isEmpty {
-                        Text("Transcription:")
-                            .font(.headline)
-                        Text(transcribedText)
-                            .padding()
-                            .background(Color(uiColor: .systemGray6))
-                            .cornerRadius(10)
-                    }
-                    
-                    if !aiResponse.isEmpty {
-                        Text("AI Response:")
-                            .font(.headline)
-                        Text(aiResponse)
-                            .padding()
-                            .background(Color(uiColor: .systemGray6))
-                            .cornerRadius(10)
-                    }
-                }
-                .padding()
-            }
+        ZStack {
+            // Background
+            Color(uiColor: .systemBackground)
+                .edgesIgnoringSafeArea(.all)
             
-            // Recording Controls
-            Button(action: {
-                isRecording.toggle()
-                if isRecording {
-                    startRecording()
-                } else {
-                    stopRecording()
+            VStack(spacing: 24) {
+                // Header
+                Text("Sales AiGent")
+                    .font(.system(size: 28, weight: .bold))
+                    .foregroundColor(.primary)
+                    .padding(.top)
+                
+                // Transcription Display
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 16) {
+                        if !transcribedText.isEmpty {
+                            TranscriptionCard(title: "Your Speech", content: transcribedText)
+                        }
+                        
+                        if !aiResponse.isEmpty {
+                            TranscriptionCard(title: "AI Coach Feedback", content: aiResponse)
+                        }
+                    }
+                    .padding(.horizontal)
                 }
-            }) {
-                HStack {
-                    Image(systemName: isRecording ? "stop.circle.fill" : "mic.circle.fill")
-                        .font(.system(size: 44))
-                    Text(isRecording ? "Stop Recording" : "Start Recording")
-                        .font(.headline)
+                
+                Spacer()
+                
+                // Recording Button
+                Button(action: {
+                    isRecording.toggle()
+                    if isRecording {
+                        startRecording()
+                    } else {
+                        stopRecording()
+                    }
+                }) {
+                    ZStack {
+                        Circle()
+                            .fill(isRecording ? Color.red : Color.blue)
+                            .frame(width: 80, height: 80)
+                            .shadow(radius: 5)
+                        
+                        Image(systemName: isRecording ? "stop.fill" : "mic.fill")
+                            .font(.system(size: 32, weight: .medium))
+                            .foregroundColor(.white)
+                    }
                 }
-                .foregroundColor(isRecording ? .red : .blue)
-                .padding()
-                .background(Color(uiColor: .systemGray6))
-                .cornerRadius(15)
+                .padding(.bottom, 32)
             }
         }
-        .padding()
+        .preferredColorScheme(.dark)
+        .overlay(
+            Group {
+                if isProcessing {
+                    VStack {
+                        ProgressView()
+                            .scaleEffect(1.5)
+                        Text("Analyzing your sales approach...")
+                            .foregroundColor(.secondary)
+                            .padding(.top)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Color.black.opacity(0.4))
+                }
+            }
+        )
+        .alert("Error", isPresented: .constant(errorMessage != nil)) {
+            Button("OK") {
+                errorMessage = nil
+            }
+        } message: {
+            if let errorMessage = errorMessage {
+                Text(errorMessage)
+            }
+        }
         .onAppear {
             requestSpeechPermission()
         }
@@ -102,9 +134,70 @@ struct ContentView: View {
     
     private func stopRecording() {
         speechRecognizer.stopRecording()
-        // Here we would send the transcribed text to OpenAI
-        // and update aiResponse with the response
+        
+        // Only proceed if we have transcribed text
+        guard !transcribedText.isEmpty else { return }
+        
+        isProcessing = true
+        
+        Task {
+            do {
+                let response = try await openAIService.generateSalesCoachingResponse(for: transcribedText)
+                await MainActor.run {
+                    aiResponse = response
+                    isProcessing = false
+                }
+            } catch {
+                await MainActor.run {
+                    errorMessage = error.localizedDescription
+                    isProcessing = false
+                }
+            }
+        }
     }
+}
+
+// Custom card view for transcriptions
+struct TranscriptionCard: View {
+    let title: String
+    let content: String
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text(title)
+                    .font(.headline)
+                    .foregroundColor(.primary)
+                
+                Spacer()
+                
+                if title == "AI Coach Feedback" {
+                    Button(action: {
+                        UIPasteboard.general.string = content
+                    }) {
+                        Image(systemName: "doc.on.doc")
+                            .foregroundColor(.secondary)
+                    }
+                }
+            }
+            
+            Text(content)
+                .font(.body)
+                .foregroundColor(.secondary)
+                .padding()
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color(uiColor: .secondarySystemBackground))
+                .cornerRadius(12)
+        }
+        .padding(.vertical, 8)
+    }
+}
+
+// Custom color extension for consistent theming
+extension Color {
+    static let darkBackground = Color(uiColor: .systemBackground)
+    static let cardBackground = Color(uiColor: .secondarySystemBackground)
+    static let accentBlue = Color.blue
 }
 
 #Preview {
