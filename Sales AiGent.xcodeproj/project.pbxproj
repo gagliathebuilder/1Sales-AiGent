@@ -7,8 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		10B60BE72D402984007C2131 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 10B60BE62D402984007C2131 /* Alamofire */; };
-		10B60BE92D402984007C2131 /* AlamofireDynamic in Frameworks */ = {isa = PBXBuildFile; productRef = 10B60BE82D402984007C2131 /* AlamofireDynamic */; };
+		1057F04C2D403457005CB3DF /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 1057F04B2D403457005CB3DF /* Alamofire */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -57,8 +56,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				10B60BE72D402984007C2131 /* Alamofire in Frameworks */,
-				10B60BE92D402984007C2131 /* AlamofireDynamic in Frameworks */,
+				1057F04C2D403457005CB3DF /* Alamofire in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -113,14 +111,14 @@
 			buildRules = (
 			);
 			dependencies = (
+				1057F04E2D40347B005CB3DF /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				10B60BB52D400CCF007C2131 /* Sales AiGent */,
 			);
 			name = "Sales AiGent";
 			packageProductDependencies = (
-				10B60BE62D402984007C2131 /* Alamofire */,
-				10B60BE82D402984007C2131 /* AlamofireDynamic */,
+				1057F04B2D403457005CB3DF /* Alamofire */,
 			);
 			productName = "Sales AiGent";
 			productReference = 10B60BB32D400CCF007C2131 /* Sales AiGent.app */;
@@ -205,7 +203,7 @@
 			mainGroup = 10B60BAA2D400CCF007C2131;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				10B60BE52D402984007C2131 /* XCRemoteSwiftPackageReference "Alamofire" */,
+				1057F04A2D403457005CB3DF /* XCRemoteSwiftPackageReference "Alamofire" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 10B60BB42D400CCF007C2131 /* Products */;
@@ -268,6 +266,10 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		1057F04E2D40347B005CB3DF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = 1057F04D2D40347B005CB3DF /* Alamofire */;
+		};
 		10B60BC52D400CD0007C2131 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 10B60BB22D400CCF007C2131 /* Sales AiGent */;
@@ -578,7 +580,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		10B60BE52D402984007C2131 /* XCRemoteSwiftPackageReference "Alamofire" */ = {
+		1057F04A2D403457005CB3DF /* XCRemoteSwiftPackageReference "Alamofire" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Alamofire/Alamofire.git";
 			requirement = {
@@ -589,15 +591,15 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		10B60BE62D402984007C2131 /* Alamofire */ = {
+		1057F04B2D403457005CB3DF /* Alamofire */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 10B60BE52D402984007C2131 /* XCRemoteSwiftPackageReference "Alamofire" */;
+			package = 1057F04A2D403457005CB3DF /* XCRemoteSwiftPackageReference "Alamofire" */;
 			productName = Alamofire;
 		};
-		10B60BE82D402984007C2131 /* AlamofireDynamic */ = {
+		1057F04D2D40347B005CB3DF /* Alamofire */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 10B60BE52D402984007C2131 /* XCRemoteSwiftPackageReference "Alamofire" */;
-			productName = AlamofireDynamic;
+			package = 1057F04A2D403457005CB3DF /* XCRemoteSwiftPackageReference "Alamofire" */;
+			productName = Alamofire;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

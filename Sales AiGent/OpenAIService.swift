@@ -7,15 +7,28 @@ class OpenAIService: ObservableObject {
     
     @Published var isLoading = false
     
-    init() {
-        // In production, you should store this securely
-        guard let apiKey = ProcessInfo.processInfo.environment["OPENAI_API_KEY"] else {
+    init(apiKey: String? = nil) {
+        // First try the passed API key, then environment, then Info.plist
+        if let key = apiKey {
+            self.apiKey = key
+        } else if let envKey = ProcessInfo.processInfo.environment["OPENAI_API_KEY"] {
+            self.apiKey = envKey
+        } else if let infoPlistKey = Bundle.main.object(forInfoDictionaryKey: "OpenAIAPIKey") as? String {
+            self.apiKey = infoPlistKey
+        } else {
+            // In development, you could provide a default key here
+            #if DEBUG
+            self.apiKey = "your-development-key-here"
+            #else
             fatalError("OpenAI API key not found")
+            #endif
         }
-        self.apiKey = apiKey
     }
     
     func generateSalesCoachingResponse(for text: String) async throws -> String {
+        isLoading = true
+        defer { isLoading = false }
+        
         let headers: HTTPHeaders = [
             "Authorization": "Bearer \(apiKey)",
             "Content-Type": "application/json"
@@ -45,6 +58,7 @@ class OpenAIService: ObservableObject {
                       parameters: parameters, 
                       encoding: JSONEncoding.default, 
                       headers: headers)
+                .validate()
                 .responseDecodable(of: OpenAIResponse.self) { response in
                     switch response.result {
                     case .success(let openAIResponse):
@@ -75,4 +89,11 @@ struct OpenAIResponse: Decodable {
 
 enum OpenAIError: Error {
     case noResponseContent
+    
+    var localizedDescription: String {
+        switch self {
+        case .noResponseContent:
+            return "The AI response was empty. Please try again."
+        }
+    }
 } 
