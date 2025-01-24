@@ -93,7 +93,8 @@ struct ContentView: View {
         }
 
         // Start the recognition task
-        recognitionTask = speechRecognizer?.recognitionTask(with: recognitionRequest, resultHandler: { result, error in
+        recognitionTask = speechRecognizer?.recognitionTask(with: recognitionRequest, resultHandler: { [weak self] result, error in
+            guard let self = self else { return }
             if let result = result {
                 self.transcribedText = result.bestTranscription.formattedString
             }
