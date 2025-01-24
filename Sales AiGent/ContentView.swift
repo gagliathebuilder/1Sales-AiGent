@@ -7,197 +7,150 @@
 
 import SwiftUI
 import Speech
-#if canImport(UIKit)
-import UIKit
-#endif
+import AVFoundation
+import Alamofire
 
 struct ContentView: View {
-    @StateObject private var speechRecognizer = SpeechRecognizer()
-    @State private var transcribedText = ""
     @State private var isRecording = false
+    @State private var transcribedText = ""
     @State private var aiResponse = ""
-    @StateObject private var openAIService = OpenAIService()
-    @State private var isProcessing = false
-    @State private var errorMessage: String?
+    
+    private let speechRecognizer = SFSpeechRecognizer(locale: Locale(identifier: "en-US"))
+    private let audioEngine = AVAudioEngine()
+    private var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
+    private var recognitionTask: SFSpeechRecognitionTask?
     
     var body: some View {
-        ZStack {
-            // Background
-            Color(uiColor: .systemBackground)
-                .edgesIgnoringSafeArea(.all)
+        VStack {
+            Text("SpeechAI")
+                .font(.largeTitle)
+                .padding()
             
-            VStack(spacing: 24) {
-                // Header
-                Text("Sales AiGent")
-                    .font(.system(size: 28, weight: .bold))
-                    .foregroundColor(.primary)
-                    .padding(.top)
+            ScrollView {
+                Text(transcribedText)
+                    .padding()
                 
-                // Transcription Display
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 16) {
-                        if !transcribedText.isEmpty {
-                            TranscriptionCard(title: "Your Speech", content: transcribedText)
-                        }
-                        
-                        if !aiResponse.isEmpty {
-                            TranscriptionCard(title: "AI Coach Feedback", content: aiResponse)
-                        }
-                    }
-                    .padding(.horizontal)
-                }
-                
-                Spacer()
-                
-                // Recording Button
-                Button(action: {
-                    isRecording.toggle()
-                    if isRecording {
-                        startRecording()
-                    } else {
-                        stopRecording()
-                    }
-                }) {
-                    ZStack {
-                        Circle()
-                            .fill(isRecording ? Color.red : Color.blue)
-                            .frame(width: 80, height: 80)
-                            .shadow(radius: 5)
-                        
-                        Image(systemName: isRecording ? "stop.fill" : "mic.fill")
-                            .font(.system(size: 32, weight: .medium))
-                            .foregroundColor(.white)
-                    }
-                }
-                .padding(.bottom, 32)
+                Text(aiResponse)
+                    .padding()
+                    .foregroundColor(.blue)
             }
-        }
-        .preferredColorScheme(.dark)
-        .overlay(
-            Group {
-                if isProcessing {
-                    VStack {
-                        ProgressView()
-                            .scaleEffect(1.5)
-                        Text("Analyzing your sales approach...")
-                            .foregroundColor(.secondary)
-                            .padding(.top)
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(Color.black.opacity(0.4))
-                }
+            
+            Button(action: {
+                self.isRecording ? self.stopRecording() : self.startRecording()
+            }) {
+                Text(isRecording ? "Stop Listening" : "Start Listening")
+                    .padding()
+                    .background(isRecording ? Color.red : Color.green)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
             }
-        )
-        .alert("Error", isPresented: .constant(errorMessage != nil)) {
-            Button("OK") {
-                errorMessage = nil
-            }
-        } message: {
-            if let errorMessage = errorMessage {
-                Text(errorMessage)
-            }
+            .padding()
         }
         .onAppear {
-            requestSpeechPermission()
+            self.requestSpeechAuthorization()
         }
     }
     
-    private func requestSpeechPermission() {
+    private func requestSpeechAuthorization() {
         SFSpeechRecognizer.requestAuthorization { authStatus in
-            DispatchQueue.main.async {
-                switch authStatus {
-                case .authorized:
-                    print("Speech recognition authorized")
-                case .denied:
-                    print("Speech recognition authorization denied")
-                case .restricted:
-                    print("Speech recognition restricted")
-                case .notDetermined:
-                    print("Speech recognition not determined")
-                @unknown default:
-                    print("Speech recognition unknown status")
-                }
-            }
+            // Handle authorization status
         }
     }
     
     private func startRecording() {
-        speechRecognizer.startRecording { result in
-            switch result {
-            case .success(let text):
-                transcribedText = text
-            case .failure(let error):
-                print("Recording error: \(error.localizedDescription)")
-            }
+        // Ensure previous tasks are canceled
+        recognitionTask?.cancel()
+        recognitionTask = nil
+
+        // Configure the audio session
+        let audioSession = AVAudioSession.sharedInstance()
+        do {
+            try audioSession.setCategory(.record, mode: .measurement, options: .duckOthers)
+            try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
+        } catch {
+            print("Audio session properties weren't set because of an error.")
         }
+
+        // Initialize the recognition request
+        recognitionRequest = SFSpeechAudioBufferRecognitionRequest()
+        guard let recognitionRequest = recognitionRequest else {
+            fatalError("Unable to create a SFSpeechAudioBufferRecognitionRequest object")
+        }
+        recognitionRequest.shouldReportPartialResults = true
+
+        // Start the audio engine
+        let inputNode = audioEngine.inputNode
+        let recordingFormat = inputNode.outputFormat(forBus: 0)
+        inputNode.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat) { (buffer, when) in
+            recognitionRequest.append(buffer)
+        }
+
+        audioEngine.prepare()
+        do {
+            try audioEngine.start()
+        } catch {
+            print("Audio engine couldn't start because of an error.")
+        }
+
+        // Start the recognition task
+        recognitionTask = speechRecognizer?.recognitionTask(with: recognitionRequest, resultHandler: { result, error in
+            if let result = result {
+                self.transcribedText = result.bestTranscription.formattedString
+            }
+            if error != nil || result?.isFinal == true {
+                self.audioEngine.stop()
+                inputNode.removeTap(onBus: 0)
+                self.recognitionRequest = nil
+                self.recognitionTask = nil
+                self.sendToOpenAI(transcription: self.transcribedText)
+            }
+        })
     }
     
     private func stopRecording() {
-        speechRecognizer.stopRecording()
-        
-        // Only proceed if we have transcribed text
-        guard !transcribedText.isEmpty else { return }
-        
-        isProcessing = true
-        
-        Task {
-            do {
-                let response = try await openAIService.generateSalesCoachingResponse(for: transcribedText)
-                await MainActor.run {
-                    aiResponse = response
-                    isProcessing = false
-                }
-            } catch {
-                await MainActor.run {
-                    errorMessage = error.localizedDescription
-                    isProcessing = false
-                }
-            }
-        }
+        audioEngine.stop()
+        recognitionRequest?.endAudio()
     }
-}
-
-// Custom card view for transcriptions
-struct TranscriptionCard: View {
-    let title: String
-    let content: String
     
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Text(title)
-                    .font(.headline)
-                    .foregroundColor(.primary)
-                
-                Spacer()
-                
-                if title == "AI Coach Feedback" {
-                    Button(action: {
-                        UIPasteboard.general.string = content
-                    }) {
-                        Image(systemName: "doc.on.doc")
-                            .foregroundColor(.secondary)
+    private func sendToOpenAI(transcription: String) {
+        guard let apiKey = ProcessInfo.processInfo.environment["OPENAI_API_KEY"] else {
+            print("API Key not found in environment variables")
+            return
+        }
+        
+        let headers: HTTPHeaders = [
+            "Authorization": "Bearer \(apiKey)",
+            "Content-Type": "application/json"
+        ]
+        
+        let parameters: [String: Any] = [
+            "model": "text-davinci-003",
+            "prompt": transcription,
+            "max_tokens": 150
+        ]
+        
+        AF.request("https://api.openai.com/v1/completions", method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: headers).responseDecodable(of: OpenAIResponse.self) { response in
+            switch response.result {
+            case .success(let openAIResponse):
+                if let text = openAIResponse.choices.first?.text {
+                    DispatchQueue.main.async {
+                        self.aiResponse = text.trimmingCharacters(in: .whitespacesAndNewlines)
                     }
                 }
+            case .failure(let error):
+                print("Error: \(error)")
             }
-            
-            Text(content)
-                .font(.body)
-                .foregroundColor(.secondary)
-                .padding()
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color(uiColor: .secondarySystemBackground))
-                .cornerRadius(12)
         }
-        .padding(.vertical, 8)
     }
 }
 
-// Custom color extension for consistent theming
-extension Color {
-    static let darkBackground = Color(uiColor: .systemBackground)
-    static let cardBackground = Color(uiColor: .secondarySystemBackground)
-    static let accentBlue = Color.blue
+// Define a struct to match the expected response from OpenAI
+struct OpenAIResponse: Decodable {
+    let choices: [Choice]
+    
+    struct Choice: Decodable {
+        let text: String
+    }
 }
 
 #Preview {

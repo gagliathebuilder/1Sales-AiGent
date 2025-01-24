@@ -1,0 +1,28 @@
+
+Showing All Issues
+
+Build target Sales AiGent of project Sales AiGent with configuration Debug
+
+Ld /Users/christophergaglia/Library/Developer/Xcode/DerivedData/Sales_AiGent-hiivnnbrrbprpaawpsuwlajhqwoy/Build/Products/Debug-iphonesimulator/Sales\ AiGent.app/Sales\ AiGent.debug.dylib normal (in target 'Sales AiGent' from project 'Sales AiGent')
+    cd /Users/christophergaglia/Desktop/SalesAiGent/Sales\ AiGent
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target arm64-apple-ios18.2-simulator -dynamiclib -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator18.2.sdk -O0 -L/Users/christophergaglia/Library/Developer/Xcode/DerivedData/Sales_AiGent-hiivnnbrrbprpaawpsuwlajhqwoy/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-iphonesimulator -L/Users/christophergaglia/Library/Developer/Xcode/DerivedData/Sales_AiGent-hiivnnbrrbprpaawpsuwlajhqwoy/Build/Products/Debug-iphonesimulator -F/Users/christophergaglia/Library/Developer/Xcode/DerivedData/Sales_AiGent-hiivnnbrrbprpaawpsuwlajhqwoy/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-iphonesimulator -F/Users/christophergaglia/Library/Developer/Xcode/DerivedData/Sales_AiGent-hiivnnbrrbprpaawpsuwlajhqwoy/Build/Products/Debug-iphonesimulator/PackageFrameworks -F/Users/christophergaglia/Library/Developer/Xcode/DerivedData/Sales_AiGent-hiivnnbrrbprpaawpsuwlajhqwoy/Build/Products/Debug-iphonesimulator -filelist /Users/christophergaglia/Library/Developer/Xcode/DerivedData/Sales_AiGent-hiivnnbrrbprpaawpsuwlajhqwoy/Build/Intermediates.noindex/Sales\ AiGent.build/Debug-iphonesimulator/Sales\ AiGent.build/Objects-normal/arm64/Sales\ AiGent.LinkFileList -install_name @rpath/Sales\ AiGent.debug.dylib -Xlinker -rpath -Xlinker /Users/christophergaglia/Library/Developer/Xcode/DerivedData/Sales_AiGent-hiivnnbrrbprpaawpsuwlajhqwoy/Build/Products/Debug-iphonesimulator/PackageFrameworks -Xlinker -rpath -Xlinker @executable_path/Frameworks -dead_strip -Xlinker -object_path_lto -Xlinker /Users/christophergaglia/Library/Developer/Xcode/DerivedData/Sales_AiGent-hiivnnbrrbprpaawpsuwlajhqwoy/Build/Intermediates.noindex/Sales\ AiGent.build/Debug-iphonesimulator/Sales\ AiGent.build/Objects-normal/arm64/Sales\ AiGent_lto.o -Xlinker -export_dynamic -Xlinker -no_deduplicate -Xlinker -objc_abi_version -Xlinker 2 -Xlinker -debug_variant -fobjc-link-runtime -fprofile-instr-generate -L/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator -L/usr/lib/swift -Xlinker -add_ast_path -Xlinker /Users/christophergaglia/Library/Developer/Xcode/DerivedData/Sales_AiGent-hiivnnbrrbprpaawpsuwlajhqwoy/Build/Intermediates.noindex/Sales\ AiGent.build/Debug-iphonesimulator/Sales\ AiGent.build/Objects-normal/arm64/Sales_AiGent.swiftmodule -Wl,-no_warn_duplicate_libraries -framework CFNetwork -Xlinker -alias -Xlinker _main -Xlinker ___debug_main_executable_dylib_entry_point -Xlinker -no_adhoc_codesign -Xlinker -dependency_info -Xlinker /Users/christophergaglia/Library/Developer/Xcode/DerivedData/Sales_AiGent-hiivnnbrrbprpaawpsuwlajhqwoy/Build/Intermediates.noindex/Sales\ AiGent.build/Debug-iphonesimulator/Sales\ AiGent.build/Objects-normal/arm64/Sales\ AiGent_dependency_info.dat -o /Users/christophergaglia/Library/Developer/Xcode/DerivedData/Sales_AiGent-hiivnnbrrbprpaawpsuwlajhqwoy/Build/Products/Debug-iphonesimulator/Sales\ AiGent.app/Sales\ AiGent.debug.dylib -Xlinker -add_ast_path -Xlinker /Users/christophergaglia/Library/Developer/Xcode/DerivedData/Sales_AiGent-hiivnnbrrbprpaawpsuwlajhqwoy/Build/Intermediates.noindex/Alamofire.build/Debug-iphonesimulator/Alamofire.build/Objects-normal/arm64/Alamofire.swiftmodule
+
+ld: warning: Could not find or use auto-linked framework 'CoreAudioTypes': framework 'CoreAudioTypes' not found
+ld: warning: Could not parse or use implicit file '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk/System/Library/Frameworks/SwiftUICore.framework/SwiftUICore.tbd': cannot link directly with 'SwiftUICore' because product being built is not an allowed client of it
+Undefined symbols for architecture arm64:
+  "_main", referenced from:
+      ___debug_main_executable_dylib_entry_point in command-line-aliases-file
+ld: symbol(s) not found for architecture arm64
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+
+Could not find or use auto-linked framework 'CoreAudioTypes': framework 'CoreAudioTypes' not found
+
+Could not parse or use implicit file '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk/System/Library/Frameworks/SwiftUICore.framework/SwiftUICore.tbd': cannot link directly with 'SwiftUICore' because product being built is not an allowed client of it
+
+Undefined symbol: _main
+
+Linker command failed with exit code 1 (use -v to see invocation)
+
+
+
+Build failed    1/21/25, 1:12 PM    4.8 seconds
